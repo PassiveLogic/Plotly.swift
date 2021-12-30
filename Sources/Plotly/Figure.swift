@@ -186,35 +186,3 @@ extension Figure: Encodable {
         try container.encode(config, forKey: .config)
     }
 }
-
-#if canImport(PythonKit)
-import PythonKit
-
-public extension Figure {
-    /// Displays interactive figure in Jupyter notebook.
-    ///
-    /// Here's an example displaying a figure with a scatter and a bar trace:
-    /// ```swift
-    /// let barTrace = Scatter(x: [1, 2, 3], y: [4, 6, 5])
-    /// let scatterTrace = Scatter(x: [1, 2, 3], y: [4, 6, 5])
-    /// try Figure(data: [barTrace, scatterTrace]).display()
-    /// ```
-    ///
-    /// - Important:
-    ///   Prior to calling this method, the following Jupyter notebook magic has to be executed:
-    ///   ```
-    ///   %include "EnableIPythonDisplay.swift"
-    ///   ```
-    ///
-    /// - Bug:
-    ///   Google Colab seems to be a bit broken. I wasn't able to figure out a Swift-only communication with the Jupyter kernel.
-    ///   There's more details in the `Workaround.ipynb` notebook. A Swift only solution that works locally in Jupyter breaks in
-    ///   the Colab environment. For the time being, to make the display method work, the communication with the kernel has to
-    ///   be routed via the Python bridge.
-    func display() throws {
-        let htmlContent = try HTML.create(from: self, plotly: .online, mathJax: .online, document: false)
-        let iPythonDisplay = try Python.attemptImport("IPython.display")
-        iPythonDisplay[dynamicMember: "display"](iPythonDisplay.HTML(htmlContent))
-    }
-}
-#endif
